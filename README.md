@@ -54,29 +54,26 @@ private:
 public:
 	DynamicStringArray();
 	DynamicStringArray(const DynamicStringArray&);
+	const DynamicStringArray& operator=(const DynamicStringArray& right);
 	~DynamicStringArray();
 	size_t getSize() const;
 	void addEntry(string);
 	bool deleteEntry(string);
 	string getEntry(size_t);
-	const DynamicStringArray& operator=(const DynamicStringArray& right);
 };
 
-//constructor
 DynamicStringArray::DynamicStringArray()
 	: dynamicArray(nullptr), size(0) {}
 
-//copy constructor
 DynamicStringArray::DynamicStringArray(const DynamicStringArray& src)
 	: size(src.size), dynamicArray(new string[src.size]) {
-	for (size_t i = 0; i < src.size; i++) { //deep copy
+	for (size_t i = 0; i < src.size; i++) {
 		dynamicArray[i] = src.dynamicArray[i];
 	}
 }
 
-//operator = overload : copy DynamicStringArray
 const DynamicStringArray& DynamicStringArray::operator=(const DynamicStringArray& right) {
-	if (this != &right) { 
+	if (this != &right) {
 		delete[] this->dynamicArray;
 		this->size = right.size;
 		this->dynamicArray = new string[this->size];
@@ -87,17 +84,15 @@ const DynamicStringArray& DynamicStringArray::operator=(const DynamicStringArray
 	return *this;
 }
 
-//destructor
 DynamicStringArray::~DynamicStringArray() {
+	cout << "Destructor Called\n";
 	delete[] this->dynamicArray;
 }
 
-//func: return size
 size_t DynamicStringArray::getSize() const {
 	return this-> size;
 }
 
-//func: allocate memory of (size+1)*sizeof(string), then add a string back of DynamicStringArray.
 void DynamicStringArray::addEntry(string str){
 	string* newDynamicArray = new string[(this->size) + 1];
 	for (size_t i = 0; i < this->size; i++) {
@@ -109,7 +104,6 @@ void DynamicStringArray::addEntry(string str){
 	this->dynamicArray = newDynamicArray;
 }
 
-//func: to delete a string. If a string want to delete exists, delete string and return true. If not, return false.
 bool DynamicStringArray::deleteEntry(string str) {
 	bool finder = false; size_t findIndex;
 	for (size_t i = 0; i < this->size; i++) {
@@ -133,7 +127,6 @@ bool DynamicStringArray::deleteEntry(string str) {
 	return finder;
 }
 
-//func: return a string that is appopriate to index. If there's no appopriate string for index, return nullptr.
 string DynamicStringArray::getEntry(size_t index) {
 	if (this->size <= index) {
 		return nullptr;
@@ -143,7 +136,6 @@ string DynamicStringArray::getEntry(size_t index) {
 	}
 }
 
-//main함수는 테스트를 위한 코드로 이루어져 있다
 int main() {
 	DynamicStringArray strarr;
 	string str;
@@ -187,7 +179,7 @@ int main() {
 
 	cout << '\n';
 
-	cout << "delete destructor test, destructor will be called 2 times\n" << "if destructor called, print message \"Destructor Called\"";
+	cout << "delete destructor test, destructor will be called 2 times\n" << "if destructor called, print message \"Destructor Called\"\n";
 	delete[] dynamic_alloc_testcase;
 
 	cout << '\n';
