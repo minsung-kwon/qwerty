@@ -37,3 +37,118 @@ microsoft visual studio 내의 자체 컴파일러와 gcc기반의 온라인 컴
 - CPU: 13th Gen Intel(R) Core(TM) i5-1340P
 - RAN: 16GB, 6000MHz
 - RyuGod 서버 기준: 우분투 linux 20.04 
+
+### 소스 코드 (분리 컴파일 기준)
+
+- DynamicStringArray.h
+```cpp
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+class DynamicStringArray {
+private:
+	string* dynamicArray;
+	size_t size;
+public:
+	DynamicStringArray();
+	DynamicStringArray(const DynamicStringArray&);
+	~DynamicStringArray();
+	size_t getSize() const;
+	void addEntry(string);
+	bool deleteEntry(string);
+	string getEntry(size_t);
+	const DynamicStringArray& operator=(const DynamicStringArray& right);
+};
+```
+- DynamicStringArray.cpp
+```cpp
+#pragma once
+
+#include <iostream>
+#include <string>
+#include "DynamicStringArray.h"
+
+using namespace std;
+
+//constructor
+DynamicStringArray::DynamicStringArray()
+	: dynamicArray(nullptr), size(0) {}
+
+//copy constructor
+DynamicStringArray::DynamicStringArray(const DynamicStringArray& src)
+	: size(src.size), dynamicArray(new string[src.size]) {
+	for (size_t i = 0; i < src.size; i++) { //deep copy
+		dynamicArray[i] = src.dynamicArray[i];
+	}
+}
+
+//operator = overload : copy DynamicStringArray
+const DynamicStringArray& DynamicStringArray::operator=(const DynamicStringArray& right) {
+	if (this != &right) { 
+		delete[] this->dynamicArray;
+		this->size = right.size;
+		this->dynamicArray = new string[this->size];
+		for (size_t i = 0; i < this->size; i++) {
+			this->dynamicArray[i] = right.dynamicArray[i];
+		}
+	}
+	return *this;
+}
+
+//destructor
+DynamicStringArray::~DynamicStringArray() {
+	delete[] this->dynamicArray;
+}
+
+//func: return size
+size_t DynamicStringArray::getSize() const {
+	return this-> size;
+}
+
+//func: allocate memory of (size+1)*sizeof(string), then add a string back of DynamicStringArray.
+void DynamicStringArray::addEntry(string str){
+	string* newDynamicArray = new string[(this->size) + 1];
+	for (size_t i = 0; i < this->size; i++) {
+		newDynamicArray[i] = this->dynamicArray[i];
+	}
+	newDynamicArray[this->size] = str;
+	delete[] this->dynamicArray;
+	(this->size)++;
+	this->dynamicArray = newDynamicArray;
+}
+
+//func: to delete a string. If a string want to delete exists, delete string and return true. If not, return false.
+bool DynamicStringArray::deleteEntry(string str) {
+	bool finder = false; size_t findIndex;
+	for (size_t i = 0; i < this->size; i++) {
+		if (this->dynamicArray[i] == str) {
+			finder = true;
+			findIndex = i;
+		}
+	}
+	if (finder) {
+		string* newDynamicArray = new string[(this->size) - 1];
+		for (size_t i = 0; i < findIndex; i++) {
+			newDynamicArray[i] = this->dynamicArray[i];
+		}
+		for (size_t i = findIndex + 1; i < this->size; i++) {
+			newDynamicArray[i - 1] = dynamicArray[i];
+		}
+		delete[] this->dynamicArray;
+		(this->size)--;
+		this->dynamicArray = newDynamicArray;
+	}
+	return finder;
+}
+
+//func: return a string that is appopriate to index. If there's no appopriate string for index, return nullptr.
+string DynamicStringArray::getEntry(size_t index) {
+	if (this->size <= index) {
+		return nullptr;
+	}
+	else {
+		return this->dynamicArray[index];
+	}
+}
