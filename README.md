@@ -38,9 +38,9 @@ microsoft visual studio 내의 자체 컴파일러와 gcc기반의 온라인 컴
 - RAN: 16GB, 6000MHz
 - RyuGod 서버 기준: 우분투 linux 20.04 
 
-### 소스 코드 (분리 컴파일 기준)
+### 소스 코드
 
-- DynamicStringArray.h
+- DynamicStringArray.cpp
 ```cpp
 #include <iostream>
 #include <string>
@@ -61,16 +61,6 @@ public:
 	string getEntry(size_t);
 	const DynamicStringArray& operator=(const DynamicStringArray& right);
 };
-```
-- DynamicStringArray.cpp
-```cpp
-#pragma once
-
-#include <iostream>
-#include <string>
-#include "DynamicStringArray.h"
-
-using namespace std;
 
 //constructor
 DynamicStringArray::DynamicStringArray()
@@ -152,3 +142,66 @@ string DynamicStringArray::getEntry(size_t index) {
 		return this->dynamicArray[index];
 	}
 }
+
+//main함수는 테스트를 위한 코드로 이루어져 있다
+int main() {
+	DynamicStringArray strarr;
+	string str;
+	str = "qwerty";
+	cout << "getSize test\n" << strarr.getSize() << "\n";
+
+	cout << '\n';
+
+	strarr.addEntry(str);
+	cout << "addEntry-size test\n" << strarr.getSize() << "\n";
+	cout << "addEntry-index test: index[0]\n" << strarr.getEntry(0) << "\n";
+
+	cout << '\n';
+
+	DynamicStringArray copy_testcase(strarr);
+	cout << "size test for copy constructor\n" << copy_testcase.getSize() << "\n";
+	cout << "index test for copy constructor\n" << copy_testcase.getEntry(0) << "\n";
+	DynamicStringArray operator_testcase;
+	operator_testcase = strarr;
+	cout << "size test for operator \'=\'\n" << operator_testcase.getSize() << "\n";
+	cout << "index test for operator \'=\'\n" << operator_testcase.getEntry(0) << "\n";
+
+	cout << '\n';
+
+	if (!strarr.deleteEntry("abcdef")) {
+		cout << "deleteEntry test\n";
+	}
+	if (strarr.deleteEntry(str)) {
+		cout << "deleteEntry test\n";
+	}
+
+	cout << '\n';
+
+	DynamicStringArray* dynamic_alloc_testcase = new DynamicStringArray[2];
+	dynamic_alloc_testcase[0].addEntry(str);
+	dynamic_alloc_testcase[1].addEntry("index 0");
+	dynamic_alloc_testcase[1].addEntry("index 1");
+	cout << "size test for dynamic alloc 1\n" << dynamic_alloc_testcase[0].getEntry(0) << "\n";
+	cout << "size test for dynamic alloc 2\n" << dynamic_alloc_testcase[1].getEntry(0) << "\n";
+	cout << "size test for dynamic alloc 3\n" << dynamic_alloc_testcase[1].getEntry(1) << "\n";
+
+	cout << '\n';
+
+	cout << "delete destructor test, destructor will be called 2 times\n" << "if destructor called, print message \"Destructor Called\"";
+	delete[] dynamic_alloc_testcase;
+
+	cout << '\n';
+
+	cout << "error code (invalid index) test, index value is 0, DynamicStringArray size is empty now\nprogram will end" << strarr.getEntry(0) << "\n";
+	return 0;
+}
+```
+
+>코드 테스트
+1. 생성자와 getSize함수를 테스트한다.
+2. addEntry함수에서의 사이즈 증가와 문자열 추가를 테스트한다.  이때 getEntry함수 또한 함께 테스트된다.  정상적으로 동작한다면 객체의 size와 "qwerty"가 출력된다.
+3. 복사 생성자와 대입 연산자를 통한 객체 대입을 테스트한다.  정상적으로 동작한다면 복사 생성자와 대입 연산자를 통한 테스트 모두 1, "qwerty"가 출력된다.
+4. deleteEntry함수를 테스트한다.  "abcdef"를 "qwerty"하나의 문자열만이 들어가 있는 객체 strarr에 있는지 확인한다.  없다면 false가 반환되어 조건문에 따라 "deleteEntry test"가 출력된다.  "qwerty"를 "qwerty"하나의 문자열만이 들어가 있는 객체 strarr에 있는지 확인한다.  있다면 false가 반환되어 조건문에 따라 "deleteEntry test"가 출력된다.  정상적으로 작동한다면 "deleteEntry test"가 2번 출력된다.
+5. 동적할당을 테스트한다.  크기가 2인 DynamicStringArray배열을 만든다.  동적할당한 배열의 0번 인덱스에 "qwerty"문자열을 addEntry한다.  동적할당한 배열의 1번 인덱스에 "index 0"문자열을 addEntry하고, 1번 인덱스에 "index 1"문자열을 addEntry힌디.  그리고 이들을 모두 getEntry로 출력한다.  정상적으로 동작한다면 각 줄별로 "qwerty", "index 0", "index 1"이 출력된다.
+6. 소멸자를 테스트한다. 앞쪽에서 동적할당 되었던 객체들을 소멸시킨다.  소멸자가 호출될 떄마다 "Destructor Called"가 출력된다.  배열의 크기를 2로 동적할당했으므로, 정상적으로 동작한다면 "Destructor Called"가 2번 출력된다.
+7. getEntry를 테스트한다.  올바르게 작동되는 경우는 2번에서 테스트되었다.  이 테스트는 입력된 인덱스가 범위를 벗어났을 경우를 테스트한다.  올마르게 작동된다면 nullptr가 반환되어 에러로 인해 프로그램이 종료된다.
